@@ -15,7 +15,7 @@ public class MessageHolder {
     }
     
     public void saveMessage(String message){
-        for(int i = 0; i < messages.length; i++){
+        for(int i = 0; i < messages.length -1; i++){
             messages[i] = messages[i+1];
         }
         messages[messages.length -1] = message;

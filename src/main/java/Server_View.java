@@ -1,3 +1,7 @@
+
+import javax.swing.JOptionPane;
+import javax.swing.JFrame;
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
@@ -27,7 +31,7 @@ public class Server_View extends javax.swing.JFrame {
 
         jLabel2 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
+        jStartServerButton = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         Exit = new javax.swing.JMenu();
@@ -45,10 +49,10 @@ public class Server_View extends javax.swing.JFrame {
             }
         });
 
-        jButton1.setText("Start Chat Server");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        jStartServerButton.setText("Start Chat Server");
+        jStartServerButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                jStartServerButtonActionPerformed(evt);
             }
         });
 
@@ -86,7 +90,7 @@ public class Server_View extends javax.swing.JFrame {
                 .addGap(36, 36, 36))
             .addGroup(layout.createSequentialGroup()
                 .addGap(43, 43, 43)
-                .addComponent(jButton1)
+                .addComponent(jStartServerButton)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -97,23 +101,35 @@ public class Server_View extends javax.swing.JFrame {
                     .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton1)
+                .addComponent(jStartServerButton)
                 .addContainerGap(134, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void runServer(int portNumber){
+        JServer server = new JServer(portNumber);
+        server.serve();
+        System.out.println("Hello World"); 
+    }
+    private void jStartServerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jStartServerButtonActionPerformed
+        try{
+            int portNumber = Integer.parseInt(jTextField1.getText());
+            jStartServerButton.setEnabled(false);
+            Runnable runnable = () -> this.runServer(portNumber);
+            Thread t = new Thread(runnable);
+            t.start();
+        } catch (Exception e){
+            JOptionPane.showMessageDialog(new JFrame(), "Port must be an integer");
+        }
+    }//GEN-LAST:event_jStartServerButtonActionPerformed
 
     private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField1ActionPerformed
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        // TODO add your handling code here:
+        System.exit(0);
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void ExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExitActionPerformed
@@ -136,6 +152,7 @@ public class Server_View extends javax.swing.JFrame {
                     break;
                 }
             }
+            
         } catch (ClassNotFoundException ex) {
             java.util.logging.Logger.getLogger(Server_View.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
@@ -146,7 +163,8 @@ public class Server_View extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(Server_View.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-
+        
+        
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -157,12 +175,12 @@ public class Server_View extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu Exit;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JButton jStartServerButton;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
 }
