@@ -21,7 +21,9 @@ public class MessageHolder {
         messages[messages.length -1] = message;
     }
     
-    
+    public String getLastMessage(){
+        return messages[messages.length -1];
+    }
     public String[] getMessages(){
         return messages;
     }

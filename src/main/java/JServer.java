@@ -14,15 +14,16 @@ import java.util.logging.Logger;
  */
 public class JServer {
     
-    protected int port;
-    protected final String HOST = "";
+    protected int PORT;
+    protected final String HOST;
     protected MessageHolder messages;
     protected int connectionId;
     protected ArrayList<String> userNames;
     protected ArrayList<Boolean> alertNewMessages;
     
-    public JServer(int port){
-        this.port = port;
+    public JServer(int port, String host){
+        PORT = port;
+        HOST = host;
         connectionId = 0;
         userNames = new ArrayList<>();
         alertNewMessages = new ArrayList<>();
@@ -41,6 +42,7 @@ public class JServer {
             alertNewMessages.set(i, Boolean.TRUE);
         }
     }
+    
     void delegate(Socket clientSocket){
         int id = getIdForUser();
         alertNewMessages.add(true);
@@ -48,7 +50,15 @@ public class JServer {
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         ){
-            
+            if(alertNewMessages.get(id) == true){
+                String[] messageList = messages.getMessages();
+                for(String message : messageList){
+                    if(message != null){
+                        out.println(message);
+                    }
+                }       
+                    alertNewMessages.set(id, Boolean.FALSE);
+            }
             while(clientSocket.isConnected()){
                 while(in.ready()){
                     synchronized(this){
@@ -57,19 +67,13 @@ public class JServer {
                              newMessage();
                         }
                     }
-                    
                 }
                 if(alertNewMessages.get(id) == true){
-                    String[] messageList = messages.getMessages();
-                    for(String message : messageList){
-                        if(message != null){
-                            out.println(message);
-                        }
-                    }       
+                    out.println(messages.getLastMessage());       
                     alertNewMessages.set(id, Boolean.FALSE);
                 }
             }
-            System.out.println("Client Disconnected nicely");
+
         } catch (Exception e){
             System.out.println("Disconnection");
             System.err.println(e);
@@ -78,9 +82,10 @@ public class JServer {
     }
     
     public void serve() {
-        try(
-            ServerSocket serverSocket = new ServerSocket(port);
-        ) {
+        
+        try{
+            InetAddress hostIP = InetAddress.getByName(HOST);
+            ServerSocket serverSocket = new ServerSocket(PORT, 10, hostIP);
             while(true) {
                 try {
                     Socket clientSocket = serverSocket.accept();
@@ -92,7 +97,6 @@ public class JServer {
                     System.exit(-7);
                 }
             }
-        
         } catch (IOException e) {
             System.err.println(e);
             System.exit(-2);
