@@ -19,18 +19,28 @@ public class JServer {
     protected MessageHolder messages;
     protected int connectionId;
     protected ArrayList<String> userNames;
+    protected ArrayList<Integer> userID;
     protected ArrayList<Boolean> alertNewMessages;
+    protected String password;
     
-    public JServer(int port, String host){
+    public JServer(int port, String host, String password){
         PORT = port;
         HOST = host;
+        this.password = password;
         connectionId = 0;
         userNames = new ArrayList<>();
         alertNewMessages = new ArrayList<>();
+        userID = new ArrayList<>();
         messages = new MessageHolder(30);
+        
     }
-    private String getUserName(BufferedReader in, PrintWriter out){
-        return "";
+    private int getUserInfo(BufferedReader in, PrintWriter out) throws IOException{
+        userNames.add(in.readLine());
+        int id = getIdForUser();
+        userID.add(id);
+        alertNewMessages.add(true);
+        messages.saveMessage(userNames.get(id) + " has connected. Hello " + userNames.get(id) + "!");
+        return id;
     }
     private int getIdForUser(){
         int temp = connectionId;
@@ -44,13 +54,15 @@ public class JServer {
     }
     
     void delegate(Socket clientSocket){
-        int id = getIdForUser();
-        alertNewMessages.add(true);
+        int id;
         try(
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         ){
-            if(alertNewMessages.get(id) == true){
+            if(password.equals(in.readLine())){
+                synchronized(this){
+                    id = getUserInfo(in, out);
+                }
                 String[] messageList = messages.getMessages();
                 for(String message : messageList){
                     if(message != null){
@@ -58,19 +70,20 @@ public class JServer {
                     }
                 }       
                     alertNewMessages.set(id, Boolean.FALSE);
-            }
-            while(clientSocket.isConnected()){
-                while(in.ready()){
-                    synchronized(this){
-                        while(in.ready()){
-                            messages.saveMessage(in.readLine());
-                             newMessage();
+                
+                while(clientSocket.isConnected()){
+                    while(in.ready()){
+                        synchronized(this){
+                            while(in.ready()){
+                                messages.saveMessage(userNames.get(id) + ": " + in.readLine());
+                                 newMessage();
+                            }
                         }
                     }
-                }
-                if(alertNewMessages.get(id) == true){
-                    out.println(messages.getLastMessage());       
-                    alertNewMessages.set(id, Boolean.FALSE);
+                    if(alertNewMessages.get(id) == true){
+                        out.println(messages.getLastMessage());       
+                        alertNewMessages.set(id, Boolean.FALSE);
+                    }
                 }
             }
 
